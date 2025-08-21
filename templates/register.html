@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Register Student - Face Attendance System{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-600 pb-3 border-b border-gray-200">Register New Student</h1>
+    
+    <form action="{{ url_for('register') }}" method="post" class="max-w-md mx-auto">
+        <div class="mb-4 bg-gray-50 p-4 rounded-lg">
+            <label for="roll_no" class="block text-gray-700 text-sm font-bold mb-2">Roll Number:</label>
+            <input type="text" id="roll_no" name="roll_no" required 
+                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        
+        <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+            <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Full Name:</label>
+            <input type="text" id="name" name="name" required 
+                   class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        
+        <div class="flex items-center justify-between">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Continue to Face Capture
+            </button>
+            <a href="{{ url_for('index') }}" class="inline-block align-baseline font-bold text-sm text-blue-600 hover:text-blue-800 hover:underline transition duration-300 ease-in-out flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Home
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

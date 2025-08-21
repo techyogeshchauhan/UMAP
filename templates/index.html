@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Face Attendance System{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+    <h1 class="text-3xl font-bold mb-6 text-center text-blue-600 pb-3 border-b border-gray-200">Face Attendance System</h1>
+    
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- Video Feed -->
+        <div class="w-full md:w-2/3">
+            <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700">
+                <div class="relative">
+                    <img id="video-feed" src="" alt="Video Feed" class="w-full h-auto">
+                    <div id="status-overlay" class="absolute top-0 left-0 w-full p-3 bg-black bg-opacity-60 text-white flex justify-between items-center">
+                        <span id="mode-display" class="font-bold text-blue-300">Mode: LAB</span>
+                        <span id="status-message" class="text-yellow-300 font-medium">Stopped</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 w-full p-2 bg-black bg-opacity-60 text-white text-xs text-center">
+                        <span>Face the camera clearly for recognition</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="w-full md:w-1/3">
+            <div class="bg-gray-100 rounded-lg p-5 h-full shadow-md border border-gray-200">
+                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Attendance Controls</h2>
+                
+                <!-- Mode Selection -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium mb-3 text-gray-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Select Mode
+                    </h3>
+                    <div class="flex space-x-4">
+                        <button id="lab-mode" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 active-mode transition duration-200 ease-in-out flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            </svg>
+                            Lab
+                        </button>
+                        <button id="class-mode" class="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-200 ease-in-out flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            Class
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stream Controls -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium mb-3 text-gray-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14m-6 0l-4.553 2.276A1 1 0 013 15.382V8.618a1 1 0 011.447-.894L9 10m6 0l-6 4m6-4l-6-4" />
+                        </svg>
+                        Stream Controls
+                    </h3>
+                    <div class="flex space-x-4">
+                        <button id="start-stream" class="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-200 ease-in-out">Start</button>
+                        <button id="stop-stream" class="flex-1 bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-200 ease-in-out">Stop</button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium mb-3 text-gray-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Quick Actions
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ url_for('register') }}" class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 text-center transition duration-200 ease-in-out flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                            </svg>
+                            Register
+                        </a>
+                        <a href="{{ url_for('attendance') }}" class="bg-yellow-600 text-white py-3 px-4 rounded-lg hover:bg-yellow-700 text-center transition duration-200 ease-in-out flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            Records
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div>
+                    <h3 class="text-lg font-medium mb-3 text-gray-700 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Instructions
+                    </h3>
+                    <div class="bg-white rounded-lg p-3 shadow-inner">
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Select mode (Lab or Class) before marking attendance
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Face the camera clearly for recognition
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                A sound will play when attendance is marked
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Green box indicates successful recognition
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Red box indicates unknown person
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/sound.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const labModeBtn = document.getElementById('lab-mode');
+        const classModeBtn = document.getElementById('class-mode');
+        const modeDisplay = document.getElementById('mode-display');
+        const statusMessage = document.getElementById('status-message');
+        const videoFeed = document.getElementById('video-feed');
+        const startStreamBtn = document.getElementById('start-stream');
+        const stopStreamBtn = document.getElementById('stop-stream');
+        
+        // Set initial mode
+        let currentMode = 'lab';
+        
+        // Update mode display
+        function updateModeDisplay() {
+            modeDisplay.textContent = `Mode: ${currentMode.toUpperCase()}`;
+            
+            // Update button styles
+            if (currentMode === 'lab') {
+                labModeBtn.classList.add('bg-blue-600', 'text-white');
+                labModeBtn.classList.remove('bg-gray-300', 'text-gray-700');
+                classModeBtn.classList.add('bg-gray-300', 'text-gray-700');
+                classModeBtn.classList.remove('bg-blue-600', 'text-white');
+            } else {
+                classModeBtn.classList.add('bg-blue-600', 'text-white');
+                classModeBtn.classList.remove('bg-gray-300', 'text-gray-700');
+                labModeBtn.classList.add('bg-gray-300', 'text-gray-700');
+                labModeBtn.classList.remove('bg-blue-600', 'text-white');
+            }
+        }
+        
+        // Set mode function
+        function setMode(mode) {
+            currentMode = mode;
+            updateModeDisplay();
+            
+            // Send mode to server
+            fetch('{{ url_for("set_mode") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ mode: mode }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusMessage.textContent = `Mode set to ${mode.toUpperCase()}`;
+                    setTimeout(() => {
+                        statusMessage.textContent = 'Ready';
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = 'Error setting mode';
+                    statusMessage.classList.remove('text-green-400');
+                    statusMessage.classList.add('text-red-400');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusMessage.textContent = 'Error setting mode';
+                statusMessage.classList.remove('text-green-400');
+                statusMessage.classList.add('text-red-400');
+            });
+        }
+        
+        // Event listeners
+        labModeBtn.addEventListener('click', () => setMode('lab'));
+        classModeBtn.addEventListener('click', () => setMode('class'));
+        startStreamBtn.addEventListener('click', () => {
+            fetch('{{ url_for("start_stream") }}', { method: 'POST' })
+                .finally(() => {
+                    const baseUrl = "{{ url_for('video_feed') }}";
+                    videoFeed.src = `${baseUrl}?t=${Date.now()}`;
+                });
+            statusMessage.textContent = 'Ready';
+            statusMessage.classList.remove('text-red-400', 'text-yellow-300');
+            statusMessage.classList.add('text-green-400');
+        });
+        stopStreamBtn.addEventListener('click', () => {
+            fetch('{{ url_for("stop_stream") }}', { method: 'POST' })
+                .finally(() => {
+                    videoFeed.src = '';
+                });
+            statusMessage.textContent = 'Stopped';
+            statusMessage.classList.remove('text-green-400', 'text-red-400');
+            statusMessage.classList.add('text-yellow-300');
+        });
+        
+        // Initialize display and auto-start stream with cache-busting
+        updateModeDisplay();
+        if (!videoFeed.src) {
+            fetch('{{ url_for("start_stream") }}', { method: 'POST' })
+                .finally(() => {
+                    const baseUrl = "{{ url_for('video_feed') }}";
+                    videoFeed.src = `${baseUrl}?t=${Date.now()}`;
+                    statusMessage.textContent = 'Ready';
+                    statusMessage.classList.remove('text-red-400', 'text-yellow-300');
+                    statusMessage.classList.add('text-green-400');
+                });
+        }
+        
+        // Poll for attendance notifications
+        function checkAttendanceMarked() {
+            fetch('{{ url_for("check_attendance_marked") }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.play_sound) {
+                        // Play success sound when attendance is marked
+                        playSuccessSound();
+                        
+                        // Show notification
+                        statusMessage.textContent = 'Attendance Marked!';
+                        statusMessage.classList.remove('text-red-400');
+                        statusMessage.classList.add('text-green-400');
+                        
+                        // Reset after 3 seconds
+                        setTimeout(() => {
+                            statusMessage.textContent = 'Ready';
+                        }, 3000);
+                    }
+                })
+                .catch(error => console.error('Error checking attendance:', error));
+        }
+        
+        // Check for attendance marks every 2 seconds
+        setInterval(checkAttendanceMarked, 2000);
+    });
+</script>
+{% endblock %}

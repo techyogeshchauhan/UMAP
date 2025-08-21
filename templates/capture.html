@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Capture Face - Face Attendance System{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-md rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">Capture Face</h1>
+    <h2 class="text-xl font-semibold mb-4 text-center text-gray-700">{{ name }} ({{ roll_no }})</h2>
+    
+    <div class="flex flex-col md:flex-row gap-6">
+        <!-- Video Feed -->
+        <div class="w-full md:w-2/3">
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                <div class="relative">
+                    <video id="video" autoplay class="w-full h-auto" style="transform: scaleX(-1);"></video>
+                    <canvas id="canvas" class="hidden"></canvas>
+                    <div id="status-overlay" class="absolute top-0 left-0 w-full p-2 bg-black bg-opacity-50 text-white flex justify-between items-center">
+                        <span id="capture-count" class="font-bold">Captures: 0/10</span>
+                        <span id="status-message" class="text-green-400">Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="w-full md:w-1/3">
+            <div class="bg-gray-100 rounded-lg p-4 h-full">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">Capture Controls</h2>
+                
+                <!-- Progress -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium mb-2 text-gray-600">Progress</h3>
+                    <div class="w-full bg-gray-300 rounded-full h-4">
+                        <div id="progress-bar" class="bg-blue-600 h-4 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p id="progress-text" class="text-sm text-gray-600 mt-1">0 of 10 captures completed</p>
+                </div>
+                
+                <!-- Actions -->
+                <div class="mb-6">
+                    <button id="capture-btn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 mb-3">
+                        Capture Face
+                    </button>
+                    <button id="reset-btn" class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 mb-3" disabled>
+                        Reset Captures
+                    </button>
+                    <button id="save-btn" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700" disabled>
+                        Save & Complete
+                    </button>
+                </div>
+                
+                <!-- Instructions -->
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-gray-600">Instructions</h3>
+                    <ul class="list-disc pl-5 text-gray-600">
+                        <li>Position your face clearly in the camera</li>
+                        <li>Ensure good lighting on your face</li>
+                        <li>Capture 10 different angles of your face</li>
+                        <li>Try different expressions for better recognition</li>
+                        <li>Click "Save & Complete" when finished</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const captureCount = document.getElementById('capture-count');
+        const statusMessage = document.getElementById('status-message');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        const ctx = canvas.getContext('2d');
+        let stream = null;
+        let captures = 0;
+        const requiredCaptures = 10;
+        let embeddings = [];
+        
+        // Start video stream
+        async function startVideo() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                statusMessage.textContent = 'Camera ready';
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                statusMessage.textContent = 'Error accessing camera';
+                statusMessage.classList.remove('text-green-400');
+                statusMessage.classList.add('text-red-400');
+            }
+        }
+        
+        // Update progress
+        function updateProgress() {
+            const progress = (captures / requiredCaptures) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${captures} of ${requiredCaptures} captures completed`;
+            captureCount.textContent = `Captures: ${captures}/${requiredCaptures}`;
+            
+            if (captures > 0) {
+                resetBtn.disabled = false;
+            } else {
+                resetBtn.disabled = true;
+            }
+            
+            if (captures >= requiredCaptures) {
+                saveBtn.disabled = false;
+                captureBtn.disabled = true;
+                statusMessage.textContent = 'Ready to save';
+            } else {
+                saveBtn.disabled = true;
+                captureBtn.disabled = false;
+            }
+        }
+        
+        // Capture face
+        captureBtn.addEventListener('click', async function() {
+            if (captures >= requiredCaptures) {
+                return;
+            }
+            
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            // Draw the current video frame to the canvas (flipped horizontally)
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            ctx.restore();
+            
+            // Convert canvas to data URL
+            const dataURL = canvas.toDataURL('image/jpeg');
+            
+            // Store the face data
+            embeddings.push(dataURL);
+            
+            captures++;
+            updateProgress();
+            
+            statusMessage.textContent = `Captured ${captures}/${requiredCaptures}`;
+        });
+        
+        // Reset captures
+        resetBtn.addEventListener('click', function() {
+            captures = 0;
+            embeddings = [];
+            updateProgress();
+            statusMessage.textContent = 'Captures reset';
+        });
+        
+        // Save student data (send all captured images for better embedding averaging)
+        saveBtn.addEventListener('click', function() {
+            if (captures < requiredCaptures) {
+                return;
+            }
+            
+            statusMessage.textContent = 'Saving...';
+            
+            fetch('{{ url_for("save_face") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    roll_no: '{{ roll_no }}',
+                    name: '{{ name }}',
+                    images: embeddings
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Registration successful!');
+                    window.location.href = '{{ url_for("students") }}';
+                } else {
+                    statusMessage.textContent = 'Error: ' + data.message;
+                    statusMessage.classList.remove('text-green-400');
+                    statusMessage.classList.add('text-red-400');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusMessage.textContent = 'Error saving data';
+                statusMessage.classList.remove('text-green-400');
+                statusMessage.classList.add('text-red-400');
+            });
+        });
+        
+        // Initialize
+        startVideo();
+        updateProgress();
+    });
+</script>
+{% endblock %}

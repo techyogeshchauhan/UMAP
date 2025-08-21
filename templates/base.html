@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Face Attendance System{% endblock %}</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles */
+        .active-nav {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #ffffff;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span class="text-xl font-bold">Face Attendance System</span>
+                <div id="camera-status-indicator" class="ml-4 flex items-center">
+                    <span id="camera-status-dot" class="h-3 w-3 rounded-full bg-gray-400"></span>
+                    <span id="camera-status-text" class="ml-2 text-xs">Checking camera...</span>
+                </div>
+            </div>
+            <div class="hidden md:flex space-x-4">
+                <a href="{{ url_for('index') }}" class="hover:bg-blue-700 px-3 py-2 rounded {% if request.endpoint == 'index' %}bg-blue-700{% endif %}">Home</a>
+                <a href="{{ url_for('register') }}" class="hover:bg-blue-700 px-3 py-2 rounded {% if request.endpoint == 'register' %}bg-blue-700{% endif %}">Register</a>
+                <a href="{{ url_for('attendance') }}" class="hover:bg-blue-700 px-3 py-2 rounded {% if request.endpoint == 'attendance' %}bg-blue-700{% endif %}">Attendance</a>
+                <a href="{{ url_for('students') }}" class="hover:bg-blue-700 px-3 py-2 rounded {% if request.endpoint == 'students' %}bg-blue-700{% endif %}">Students</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-blue-700 pb-2">
+            <a href="{{ url_for('index') }}" class="block px-4 py-2 hover:bg-blue-800 {% if request.endpoint == 'index' %}bg-blue-800 border-l-4 border-white pl-3{% endif %}">Home</a>
+            <a href="{{ url_for('register') }}" class="block px-4 py-2 hover:bg-blue-800 {% if request.endpoint == 'register' %}bg-blue-800 border-l-4 border-white pl-3{% endif %}">Register</a>
+            <a href="{{ url_for('attendance') }}" class="block px-4 py-2 hover:bg-blue-800 {% if request.endpoint == 'attendance' %}bg-blue-800 border-l-4 border-white pl-3{% endif %}">Attendance</a>
+            <a href="{{ url_for('students') }}" class="block px-4 py-2 hover:bg-blue-800 {% if request.endpoint == 'students' %}bg-blue-800 border-l-4 border-white pl-3{% endif %}">Students</a>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mx-auto px-4 py-2">
+                {% for category, message in messages %}
+                    {% set alert_color = 'yellow' %}
+                    {% if category == 'success' %}
+                        {% set alert_color = 'green' %}
+                    {% elif category == 'error' %}
+                        {% set alert_color = 'red' %}
+                    {% elif category == 'info' %}
+                        {% set alert_color = 'blue' %}
+                    {% endif %}
+                    <div class="bg-{{ alert_color }}-100 border-l-4 border-{{ alert_color }}-500 text-{{ alert_color }}-700 p-4 mb-2 flex justify-between items-center" role="alert">
+                        <p>{{ message }}</p>
+                        <button type="button" class="text-{{ alert_color }}-700 hover:text-{{ alert_color }}-900 focus:outline-none" onclick="this.parentElement.style.display='none';">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main content -->
+    <main class="flex-grow container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; {{ now.year }} Face Attendance System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+        
+        // Camera status indicator
+        function updateCameraStatus() {
+            fetch('/camera_status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusDot = document.getElementById('camera-status-dot');
+                    const statusText = document.getElementById('camera-status-text');
+                    
+                    // Update status dot color
+                    if (data.available) {
+                        if (data.is_mock) {
+                            // Yellow for mock camera
+                            statusDot.className = 'h-3 w-3 rounded-full bg-yellow-400';
+                        } else {
+                            // Green for working camera
+                            statusDot.className = 'h-3 w-3 rounded-full bg-green-500';
+                        }
+                    } else {
+                        // Red for unavailable camera
+                        statusDot.className = 'h-3 w-3 rounded-full bg-red-500';
+                    }
+                    
+                    // Update status text
+                    statusText.textContent = data.message;
+                })
+                .catch(error => {
+                    console.error('Error checking camera status:', error);
+                    const statusDot = document.getElementById('camera-status-dot');
+                    const statusText = document.getElementById('camera-status-text');
+                    statusDot.className = 'h-3 w-3 rounded-full bg-red-500';
+                    statusText.textContent = 'Error checking camera';
+                });
+        }
+        
+        // Update camera status immediately and then every 5 seconds
+        updateCameraStatus();
+        setInterval(updateCameraStatus, 5000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
